@@ -1,0 +1,7 @@
+{
+    "galaxy.meteor.com": {
+        "env": {
+            "MONGO_URL": "mongodb://mario:qwertyasdfgh123@ds017514.mlab.com:17514/mytestapp"
+        }
+    }
+}

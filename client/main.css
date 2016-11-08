@@ -1,0 +1,25 @@
+* {
+    font-family: Geneva, Arial, Helvetica, sans-serif;
+    font-weight: 100;
+    user-select: none;
+}
+
+#app, html, body {
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+}
+
+input[type="submit"], button {
+    background: rgba(0, 0, 0, .05);
+    border: 1px solid rgba(0, 0, 0, .1);
+    color: rgba(0, 0, 0, .3);
+    border-radius: 2px;
+    padding: .5em;
+}
+
+input[type="text"] {
+    padding: .45em;
+}
