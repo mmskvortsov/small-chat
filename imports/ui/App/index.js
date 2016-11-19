@@ -28,6 +28,10 @@ class App extends Component {
         Meteor.call('tasks.setChecked', _id, value);
     }
 
+    getCount() {
+        return this.props.tasks.filter(item => !item.checked).length;
+    }
+
     renderLoader() {
         return (
             <div className = {styles.loader}></div>
@@ -48,6 +52,7 @@ class App extends Component {
                 checked = {task.checked}
                 onChange = {this.checkTask.bind(this)}
                 onRemove = {this.removeTask.bind(this)}
+                created = {task.created}
                 id = {task._id}
                 task = {task}/>
         ));
@@ -60,10 +65,11 @@ class App extends Component {
     }
 
     render() {
+        let tasksCount = this.getCount();
         return (
             <div className = {styles.container}>
                 <header>
-                    <h1>Todo-todo {this.props.ready ? `(${this.props.tasks.length})` : null}</h1>
+                    <h1>Todo-todo {this.props.ready && tasksCount ? `(${tasksCount})` : null}</h1>
                 </header>
 
                 <ul>
@@ -93,6 +99,10 @@ export default createContainer(() => {
     let subscribe = Meteor.subscribe('tasks');
     return {
         ready: subscribe.ready(),
-        tasks: Tasks.find({}).fetch()
+        tasks: Tasks.find({}, {
+            sort: {
+                created: -1
+            }
+        }).fetch()
     };
 }, App);

@@ -19,8 +19,14 @@
     flex-shrink: 0;
 }
 
-.container span {
-    margin-right: auto;
+.container .text {
     font-size: 1.3em;
     text-align: left;
+}
+
+.container .date {
+    margin-right: auto;
+    margin-left: 10px;
+    font-size: 1em;
+    color: rgb(170, 170, 170);
 }
