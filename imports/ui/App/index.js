@@ -1,35 +1,32 @@
 import React, { Component, PropTypes } from 'react';
 import ReactDOM from 'react-dom';
 import { createContainer } from 'meteor/react-meteor-data';
+import { Session } from 'meteor/session';
 
-import { Tasks } from '../../api';
-import Task from '../Task';
+import { Messages } from '../../api';
+import Message from '../Message';
 
 import styles from './style.css';
 
 class App extends Component {
 
+    constructor() {
+        super();
+        this._scrollDown = this._scrollDown.bind(this);
+    }
+
+    startChat() {
+        return Session.set("user", this.refs.userName.value.trim());
+    }
+
     onFormSubmit(event) {
-        event.preventDefault();
-        let input = ReactDOM.findDOMNode(this.refs.newTodo);
+        if (event) event.preventDefault();
+        let input = ReactDOM.findDOMNode(this.refs.newMessage);
         if (!(input.value.trim().length)) return;
 
-        Meteor.call('tasks.insert', input.value.trim());
-        document.activeElement.blur();
+        Meteor.call('messages.insert', input.value.trim(), this.props.user);
 
         input.value = "";
-    }
-
-    removeTask(_id) {
-        Meteor.call('tasks.remove', _id);
-    }
-
-    checkTask(_id, value) {
-        Meteor.call('tasks.setChecked', _id, value);
-    }
-
-    getCount() {
-        return this.props.tasks.filter(item => !item.checked).length;
     }
 
     renderLoader() {
@@ -38,70 +35,106 @@ class App extends Component {
         );
     }
 
-    renderMessage() {
+    renderIntroduce() {
         return (
-            <div className = {styles.message}>
-                We don't have tasks :(
+            <div className = {styles.introduce}>
+                <div>What is your name?</div>
+                <input type = "text"
+                    maxLength = {10}
+                    ref = "userName"
+                    onKeyUp = {this._applyUserName.bind(this)}/>
+                <button onClick = {this.startChat.bind(this)}>Enter chat!</button>
             </div>
         );
     }
 
-    renderTasks() {
-        return this.props.tasks.map((task) => (
-            <Task key = {task._id}
-                checked = {task.checked}
-                onChange = {this.checkTask.bind(this)}
-                onRemove = {this.removeTask.bind(this)}
-                created = {task.created}
-                id = {task._id}
-                task = {task}/>
+    renderMessage() {
+        return (
+            <div className = {styles.message}>
+                We don't have messages :(
+            </div>
+        );
+    }
+
+    renderMessages() {
+        return this.props.messages.map((message) => (
+            <Message key = {message._id}
+                my = {message.user == this.props.user}
+                user = {message.user}
+                created = {message.created}
+                text = {message.text}/>
         ));
     }
 
     renderContent() {
         if (!this.props.ready) return this.renderLoader();
-        if (this.props.tasks.length) return this.renderTasks();
-        if (!this.props.tasks.length) return this.renderMessage();
+        if (this.props.messages.length) return this.renderMessages();
+        if (!this.props.messages.length) return this.renderMessage();
     }
 
     render() {
-        let tasksCount = this.getCount();
+        if (!this.props.user) return this.renderIntroduce();
         return (
             <div className = {styles.container}>
                 <header>
-                    <h1>Todo-todo {this.props.ready && tasksCount ? `(${tasksCount})` : null}</h1>
+                    <h3>Messages</h3>
                 </header>
 
-                <ul>
+                <ul ref = "list">
                     {this.renderContent()}
                 </ul>
 
-                <form onSubmit = {this.onFormSubmit.bind(this)} autoComplete = "off">
-                    <input name = "todo"
-                        placeholder = "New todo..."
+                <form onSubmit = {this.onFormSubmit.bind(this)} ref = "form" autoComplete = "off">
+                    <textarea name = "todo"
+                        autoFocus = {true}
+                        placeholder = "Write a message..."
                         type = "text"
-                        ref = "newTodo"
+                        ref = "newMessage"
+                        onKeyDown = {this._checkEnter.bind(this)}
+                        onFocus = {this._scrollDown}
                         autoComplete = "off"/>
-                    <input type = "submit" value = "+"/>
+                    <input type = "submit" value = "send"/>
                 </form>
             </div>
         );
+    }
+
+    componentDidUpdate() {
+        this._scrollDown();
+    }
+
+    _checkEnter(event) {
+        if (event.keyCode == 13) {
+            if (this.refs.newMessage.value.length) this.onFormSubmit();
+            event.preventDefault();
+        }
+    }
+
+    _applyUserName(event) {
+        if (event.keyCode == 13) this.startChat();
+    }
+
+    _scrollDown() {
+        if (!this.refs.list) return;
+        let element = this.refs.list;
+        element.scrollTop = element.scrollHeight;
     }
 
 }
 
 App.propTypes = {
     ready: PropTypes.bool,
-    tasks: PropTypes.array.isRequired
+    messages: PropTypes.array.isRequired
 };
 
 export default createContainer(() => {
-    let subscribe = Meteor.subscribe('tasks');
+    let subscribe = Meteor.subscribe('messages');
     return {
+        user: Session.get("user"),
         ready: subscribe.ready(),
-        tasks: Tasks.find({}, {
+        messages: Messages.find({}, {
             sort: {
-                created: -1
+                created: 1
             }
         }).fetch()
     };
