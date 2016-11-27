@@ -56,6 +56,12 @@
     color: rgba(0, 0, 0, .3);
 }
 
+.introduce input, .introduce button {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+}
+
 .message {
     font-size: 2em;
     position: absolute;

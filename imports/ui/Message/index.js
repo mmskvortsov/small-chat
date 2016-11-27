@@ -5,7 +5,7 @@ import style from './style.css';
 
 export default class Message extends Component {
     getDate() {
-        return moment(this.props.created).format("HH:MM");
+        return moment(this.props.created).format("HH:mm");
     }
     render() {
         let containerClassName = style.container;

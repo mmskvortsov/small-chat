@@ -42,6 +42,7 @@ class App extends Component {
                 <input type = "text"
                     maxLength = {10}
                     ref = "userName"
+                    autoFocus = {true}
                     onKeyUp = {this._applyUserName.bind(this)}/>
                 <button onClick = {this.startChat.bind(this)}>Enter chat!</button>
             </div>
@@ -118,6 +119,14 @@ class App extends Component {
         if (!this.refs.list) return;
         let element = this.refs.list;
         element.scrollTop = element.scrollHeight;
+    }
+
+    componentDidMount() {
+        window.addEventListener("resize", this._scrollDown);
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener("resize", this._scrollDown);
     }
 
 }
